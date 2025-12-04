@@ -14,6 +14,7 @@ import { updateReleaseActuals } from './scrapers/fred';
 import { initializeInternationalEvents, syncAllInternationalData, COUNTRY_COVERAGE, getInternationalIndicatorCount } from './scrapers/international';
 import { wsServer } from './services/websocket';
 import { populateCalendar } from './scripts/populateCalendar';
+import { initializeUSEvents } from './scripts/initializeUSEvents';
 
 // Load environment variables
 dotenv.config();
@@ -60,8 +61,12 @@ app.post('/api/sync', async (req, res) => {
   res.json({ success: true, message: 'Sync started, check server logs for progress' });
 
   try {
-    // US data
-    console.log('Syncing US data...');
+    // Initialize US events first (creates all event definitions)
+    console.log('Initializing US events...');
+    initializeUSEvents();
+
+    // US data from BLS
+    console.log('Syncing BLS data...');
     await syncBLSEvents();
     await updateReleaseActuals();
 

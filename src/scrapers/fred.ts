@@ -100,6 +100,8 @@ export const FRED_SERIES_MAP: Record<string, { seriesId: string; unit: string; f
   'trade-balance': { seriesId: 'BOPGSTB', unit: 'Millions $', frequency: 'monthly' },
   'exports': { seriesId: 'BOPGEXP', unit: 'Millions $', frequency: 'monthly' },
   'imports': { seriesId: 'BOPGIMP', unit: 'Millions $', frequency: 'monthly' },
+  'import-prices': { seriesId: 'IR', unit: 'Index', frequency: 'monthly' },
+  'export-prices': { seriesId: 'IQ', unit: 'Index', frequency: 'monthly' },
   'dollar-index': { seriesId: 'DTWEXBGS', unit: 'Index', frequency: 'daily' },
   'current-account': { seriesId: 'NETFI', unit: 'Billions $', frequency: 'quarterly' },
   'wholesale-inventories': { seriesId: 'WHLSLRIRSA', unit: 'Ratio', frequency: 'monthly' },
