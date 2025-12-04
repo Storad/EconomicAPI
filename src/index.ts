@@ -44,6 +44,37 @@ app.get('/api/ws/stats', (_req, res) => {
   });
 });
 
+// Manual data sync endpoint (for initial production setup)
+// Protected by a simple key check - set SYNC_KEY in environment
+app.post('/api/sync', async (req, res) => {
+  const syncKey = req.headers['x-sync-key'] || req.query.key;
+  const expectedKey = process.env.SYNC_KEY || 'initial-sync-key';
+
+  if (syncKey !== expectedKey) {
+    res.status(401).json({ success: false, error: 'Invalid sync key' });
+    return;
+  }
+
+  console.log('Manual sync triggered...');
+  res.json({ success: true, message: 'Sync started, check server logs for progress' });
+
+  try {
+    // US data
+    console.log('Syncing US data...');
+    await syncBLSEvents();
+    await updateReleaseActuals();
+
+    // International data
+    console.log('Syncing international data...');
+    await initializeInternationalEvents();
+    await syncAllInternationalData();
+
+    console.log('Manual sync completed successfully');
+  } catch (error) {
+    console.error('Manual sync failed:', error);
+  }
+});
+
 // API Info
 app.get('/api', (_req, res) => {
   res.json({
