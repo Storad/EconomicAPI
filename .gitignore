@@ -13,7 +13,8 @@ dist/
 *.db
 *.sqlite
 *.sqlite3
-data/
+/data/
+!src/data/
 
 # Logs
 logs/
