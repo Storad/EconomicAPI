@@ -1,0 +1,40 @@
+{
+  "name": "economicapi",
+  "version": "1.0.0",
+  "description": "Free Economic Data API - Aggregated government data for developers",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "scrape": "ts-node src/scripts/runScrapers.ts",
+    "generate-schedule": "ts-node src/scripts/generateFutureReleases.ts",
+    "show-upcoming": "ts-node src/scripts/showUpcoming.ts",
+    "audit-fred": "ts-node src/scripts/auditFredSeries.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "better-sqlite3": "^12.5.0",
+    "cheerio": "^1.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "node-cron": "^4.2.1",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.1",
+    "@types/ws": "^8.18.1",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
