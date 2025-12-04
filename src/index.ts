@@ -189,18 +189,31 @@ async function start() {
     // Initialize database
     initializeDatabase();
 
-    // Run initial data sync (in development)
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Running initial data sync...');
+    // Always initialize US events (idempotent - uses INSERT OR IGNORE)
+    console.log('Initializing US events...');
+    const usResult = initializeUSEvents();
+    console.log(`US events: ${usResult.created} created, ${usResult.existing} already existed`);
+
+    // Always initialize international events
+    console.log(`Initializing ${getInternationalIndicatorCount()} international indicators...`);
+    await initializeInternationalEvents();
+
+    // Always populate calendar (idempotent)
+    console.log('Populating calendar releases...');
+    await populateCalendar();
+    console.log('Calendar populated');
+
+    // Run data sync in development, or if SYNC_ON_START is set
+    if (process.env.NODE_ENV !== 'production' || process.env.SYNC_ON_START === 'true') {
+      console.log('Running data sync...');
 
       // US data
       await syncBLSEvents();
       await updateReleaseActuals();
 
       // International data
-      console.log(`\nInitializing ${getInternationalIndicatorCount()} international indicators...`);
-      await initializeInternationalEvents();
       await syncAllInternationalData();
+      console.log('Data sync completed');
     }
 
     // Schedule daily full sync (6 AM ET - before markets open)
