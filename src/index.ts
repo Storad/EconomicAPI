@@ -13,6 +13,7 @@ import { syncBLSEvents } from './scrapers/bls';
 import { updateReleaseActuals } from './scrapers/fred';
 import { initializeInternationalEvents, syncAllInternationalData, COUNTRY_COVERAGE, getInternationalIndicatorCount } from './scrapers/international';
 import { wsServer } from './services/websocket';
+import { populateCalendar } from './scripts/populateCalendar';
 
 // Load environment variables
 dotenv.config();
@@ -68,6 +69,10 @@ app.post('/api/sync', async (req, res) => {
     console.log('Syncing international data...');
     await initializeInternationalEvents();
     await syncAllInternationalData();
+
+    // Populate calendar releases (December 2025 - January 2026)
+    console.log('Populating calendar releases...');
+    await populateCalendar();
 
     console.log('Manual sync completed successfully');
   } catch (error) {

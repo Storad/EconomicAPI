@@ -198,11 +198,8 @@ const ALL_RELEASES = [
   ...WEEK_DEC_29_RELEASES,
 ];
 
-async function main() {
+export async function populateCalendar(): Promise<{ inserted: number; skipped: number }> {
   console.log('Populating economic calendar with scheduled releases...');
-  console.log('='.repeat(60));
-
-  initializeDatabase();
 
   const getEventBySlug = db.prepare('SELECT id, name FROM events WHERE slug = ?');
   const insertRelease = db.prepare(`
@@ -233,10 +230,12 @@ async function main() {
     }
   }
 
-  console.log('\n' + '='.repeat(60));
-  console.log(`Inserted: ${inserted} releases`);
-  console.log(`Skipped: ${skipped} releases (missing events)`);
-  console.log('Calendar populated successfully!');
+  console.log(`Calendar populated: ${inserted} inserted, ${skipped} skipped`);
+  return { inserted, skipped };
 }
 
-main().catch(console.error);
+// Run directly if this is the main module
+if (require.main === module) {
+  initializeDatabase();
+  populateCalendar().catch(console.error);
+}
