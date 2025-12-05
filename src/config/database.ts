@@ -89,6 +89,39 @@ export function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_events_category ON events(category);
     CREATE INDEX IF NOT EXISTS idx_events_slug ON events(slug);
     CREATE INDEX IF NOT EXISTS idx_historical_event_date ON historical_data(event_id, date);
+
+    -- API Keys table for paid access
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      key_hash TEXT NOT NULL UNIQUE,
+      key_prefix TEXT NOT NULL,
+      key_suffix TEXT NOT NULL,
+      name TEXT DEFAULT 'Default Key',
+      user_id TEXT NOT NULL,
+      subscription_id TEXT,
+      status TEXT CHECK(status IN ('active', 'revoked', 'expired', 'suspended')) DEFAULT 'active',
+      rate_limit_requests INTEGER DEFAULT 1000,
+      rate_limit_window INTEGER DEFAULT 3600,
+      total_requests INTEGER DEFAULT 0,
+      last_used_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      expires_at DATETIME,
+      revoked_at DATETIME
+    );
+
+    -- Rate limiting cache for fast lookups
+    CREATE TABLE IF NOT EXISTS rate_limit_cache (
+      key_hash TEXT NOT NULL,
+      window_start INTEGER NOT NULL,
+      request_count INTEGER DEFAULT 1,
+      PRIMARY KEY (key_hash, window_start)
+    );
+
+    -- Indexes for API keys
+    CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON api_keys(user_id);
+    CREATE INDEX IF NOT EXISTS idx_api_keys_status ON api_keys(status);
+    CREATE INDEX IF NOT EXISTS idx_api_keys_key_hash ON api_keys(key_hash);
+    CREATE INDEX IF NOT EXISTS idx_rate_limit_cache_hash ON rate_limit_cache(key_hash);
   `);
 
   // Seed market sessions if empty

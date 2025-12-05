@@ -9,6 +9,9 @@ import calendarRoutes from './routes/calendar';
 import eventsRoutes from './routes/events';
 import releasesRoutes from './routes/releases';
 import sessionsRoutes from './routes/sessions';
+import keysRoutes from './routes/keys';
+import { apiKeyAuth, internalAuth } from './middleware/apiKeyAuth';
+import { rateLimiter, cleanupRateLimitCache } from './middleware/rateLimit';
 import { syncBLSEvents } from './scrapers/bls';
 import { updateReleaseActuals } from './scrapers/fred';
 import { initializeInternationalEvents, syncAllInternationalData, COUNTRY_COVERAGE, getInternationalIndicatorCount } from './scrapers/international';
@@ -166,11 +169,14 @@ app.get('/api', (_req, res) => {
   });
 });
 
-// Routes
-app.use('/api/calendar', calendarRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/releases', releasesRoutes);
-app.use('/api/sessions', sessionsRoutes);
+// Protected data routes (require API key)
+app.use('/api/calendar', apiKeyAuth, rateLimiter, calendarRoutes);
+app.use('/api/events', apiKeyAuth, rateLimiter, eventsRoutes);
+app.use('/api/releases', apiKeyAuth, rateLimiter, releasesRoutes);
+app.use('/api/sessions', apiKeyAuth, rateLimiter, sessionsRoutes);
+
+// Key management routes (internal auth from Next.js frontend)
+app.use('/api/keys', internalAuth, keysRoutes);
 
 // 404 handler
 app.use((_req, res) => {
@@ -227,6 +233,9 @@ async function start() {
         // International data
         await initializeInternationalEvents();
         await syncAllInternationalData();
+
+        // Cleanup old rate limit cache entries
+        cleanupRateLimitCache();
 
         console.log('Daily sync completed');
       } catch (error) {
